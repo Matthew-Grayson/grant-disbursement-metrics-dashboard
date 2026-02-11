@@ -56,6 +56,66 @@ This domain tracks the flow of federal financial assistance:
 
 ---
 
+## Local Development
+
+### Prerequisites
+- Docker Desktop
+- Docker Compose
+- Python 3 (for generating an Airflow Fernet key)
+
+### Configure environment variables
+This repo uses a single `.env` file for the local stack.
+
+1) Create your local `.env` file:
+```bash
+cp infra/compose/.env.example infra/compose/.env
+```
+
+2) Generate an Airflow Fernet key **before** starting the stack.
+
+Airflow requires a valid Fernet key at startup to encrypt sensitive fields in its metadata database.
+
+**Recommended (no dependencies):**
+```bash
+python3 -c "import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())"
+```
+
+Paste the output into `infra/compose/.env`:
+```dotenv
+AIRFLOW__CORE__FERNET_KEY=PASTE_VALUE_HERE
+```
+
+> Notes:
+> - Do not add quotes around the value.
+> - Keep the key on a single line with no trailing spaces.
+
+**Alternative (after the stack is running):**
+If the Airflow webserver container is already running, you can generate a Fernet key using the container’s Python environment:
+```bash
+docker exec -it lakehouse-airflow-webserver python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+3) Ensure local `.env` is not committed.
+- `infra/compose/.env` must be listed in `.gitignore`.
+
+### Start the local stack
+From the compose directory:
+```bash
+cd infra/compose
+docker compose up -d
+```
+
+### Access local services
+- Airflow UI: http://localhost:8080
+- MinIO console: http://localhost:9001
+- Postgres: localhost:5432
+
+### Stop the local stack
+```bash
+cd infra/compose
+docker compose down
+```
+
 ## Data Model Overview (Medallion Layers)
 
 ### Bronze (raw, immutable)
@@ -358,3 +418,6 @@ A dashboard number must be traceable back to original evidence:
     - `document_id` → `source_object_id` → Bronze S3 key + SHA-256.
 
 ---
+
+## Miscellaneous TODOs
+- Integrate existing HUD datasets (e.g., DRGR Public Data, HUD Open Data Catalog, Consolidated Planning/CHAS Data)
