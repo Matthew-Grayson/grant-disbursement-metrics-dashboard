@@ -68,7 +68,7 @@ This repo uses a single `.env` file for the local stack.
 
 1) Create your local `.env` file:
 ```bash
-cp infra/compose/.env.example infra/compose/.env
+cp infrastructure/compose/.env.example infrastructure/compose/.env
 ```
 
 2) Generate an Airflow Fernet key **before** starting the stack.
@@ -80,7 +80,7 @@ Airflow requires a valid Fernet key at startup to encrypt sensitive fields in it
 python3 -c "import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())"
 ```
 
-Paste the output into `infra/compose/.env`:
+Paste the output into `infrastructure/compose/.env`:
 ```dotenv
 AIRFLOW__CORE__FERNET_KEY=PASTE_VALUE_HERE
 ```
@@ -96,12 +96,12 @@ docker exec -it lakehouse-airflow-webserver python -c "from cryptography.fernet 
 ```
 
 3) Ensure local `.env` is not committed.
-- `infra/compose/.env` must be listed in `.gitignore`.
+- `infrastructure/compose/.env` must be listed in `.gitignore`.
 
 ### Start the local stack
 From the compose directory:
 ```bash
-cd infra/compose
+cd infrastructure/compose
 docker compose up -d
 ```
 
@@ -112,7 +112,7 @@ docker compose up -d
 
 ### Stop the local stack
 ```bash
-cd infra/compose
+cd infrastructure/compose
 docker compose down
 ```
 
